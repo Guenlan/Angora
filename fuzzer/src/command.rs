@@ -1,3 +1,4 @@
+//使用到的module
 use crate::{check_dep, search, tmpfs};
 use angora_common::defs;
 use std::{
@@ -6,18 +7,22 @@ use std::{
     process::Command,
 };
 
+//字符串常量设置
 static TMP_DIR: &str = "tmp";
 static INPUT_FILE: &str = "cur_input";
 static FORKSRV_SOCKET_FILE: &str = "forksrv_socket";
 static TRACK_FILE: &str = "track";
 static PIN_ROOT_VAR: &str = "PIN_ROOT";
 
+//定义了一个枚举，包含两种Instrumentation Mode：LLVM、Pin
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum InstrumentationMode {
     LLVM,
     Pin,
 }
-
+//对枚举类型InstrumentationMode定义一些方法：
+//  from：看str是否为LLVM、Pin中的一种
+//  is_pin_mode：判断自身是否为Pin
 impl InstrumentationMode {
     pub fn from(mode: &str) -> Self {
         match mode {
@@ -32,8 +37,14 @@ impl InstrumentationMode {
     }
 }
 
+/*
+问题一：CommandOpt是用来干什么的？
+
+
+*/
 #[derive(Debug, Clone)]
 pub struct CommandOpt {
+    //mode就是前面定义的枚举类型
     pub mode: InstrumentationMode,
     pub id: usize,
     pub main: (String, Vec<String>),
@@ -43,6 +54,7 @@ pub struct CommandOpt {
     pub forksrv_socket_path: String,
     pub track_path: String,
     pub is_stdin: bool,
+    //SearchMethod也是一种枚举类型：Gd,Random,Cbh,Mb，但不清楚每一个的含义
     pub search_method: search::SearchMethod,
     pub mem_limit: u64,
     pub time_limit: u64,
@@ -65,6 +77,7 @@ impl CommandOpt {
         enable_afl: bool,
         enable_exploitation: bool,
     ) -> Self {
+        //看传入的mode是枚举类型InstrumentationMode中的哪一个元素，并返回该元素
         let mode = InstrumentationMode::from(mode);
         
         let tmp_dir = out_dir.join(TMP_DIR);
